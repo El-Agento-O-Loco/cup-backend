@@ -21,12 +21,19 @@ def handle_preflight():
         response.headers.add('Access-Control-Max-Age', "3600")
         return response, 200
 
-# Your bearer token from Claude Code settings
-BEARER_TOKEN = ""
+# ------------------------------------------------------------------
+# UPDATED: Get the token from AWS App Runner Environment Variables
+# ------------------------------------------------------------------
+BEARER_TOKEN = os.environ.get("BEARER_TOKEN", "")
 
 def call_bedrock_api(messages, model="claude-sonnet-4"):
     """Call Bedrock API using Claude Code's authentication method"""
     try:
+        # Safety Check: Ensure token exists before processing
+        if not BEARER_TOKEN:
+            print("CRITICAL ERROR: BEARER_TOKEN is missing. Check App Runner Configuration.")
+            return "Error: Server API Token is not configured."
+
         # Decode the bearer token to get the pre-signed URL
         encoded_url = BEARER_TOKEN.replace("bedrock-api-key-", "")
         decoded_url = base64.b64decode(encoded_url + "===").decode('utf-8')
@@ -183,5 +190,6 @@ def chat_completions():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    print("Starting Bedrock proxy on http://localhost:5000")
+    # Ensure this matches the port configured in App Runner (8080)
+    print("Starting Bedrock proxy on http://0.0.0.0:8080")
     app.run(host='0.0.0.0', port=8080, debug=True)
