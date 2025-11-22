@@ -21,9 +21,6 @@ def handle_preflight():
         response.headers.add('Access-Control-Max-Age', "3600")
         return response, 200
 
-# ------------------------------------------------------------------
-# UPDATED: Get the token from AWS App Runner Environment Variables
-# ------------------------------------------------------------------
 BEARER_TOKEN = os.environ.get("BEARER_TOKEN", "")
 
 def call_bedrock_api(messages, model="claude-sonnet-4"):
@@ -190,6 +187,5 @@ def chat_completions():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # Ensure this matches the port configured in App Runner (8080)
     print("Starting Bedrock proxy on http://0.0.0.0:8080")
     app.run(host='0.0.0.0', port=8080, debug=True)
